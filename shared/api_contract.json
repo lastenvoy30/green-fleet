@@ -1,0 +1,33 @@
+{
+  "vessel": {
+    "id": "string",
+    "type": "string (e.g. container_ship, bulk_carrier)",
+    "capacity_teu": "number",
+    "base_fuel_type": "string (diesel | lng | methanol | ammonia | hydrogen)",
+    "speed_knots": "number",
+    "displacement_tons": "number"
+  },
+  "voyage_request": {
+    "origin": "string",
+    "destination": "string",
+    "cargo_demand_teu": "number",
+    "deadline_days": "number"
+  },
+  "prediction_response_example": {
+    "fuel_consumed_tons": 42.5,
+    "co2_emissions_tons": 132.1,
+    "fuel_type": "diesel"
+  },
+  "optimize_response_example": {
+    "recommended_plan": [
+      {
+        "vessel_id": "V1",
+        "fuel_type": "methanol",
+        "speed_knots": 14.5
+      }
+    ],
+    "total_cost_usd": 250000,
+    "carbon_tax_avoided_eur": 400000,
+    "cii_grade": "B"
+  }
+}
