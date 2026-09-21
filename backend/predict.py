@@ -48,4 +48,4 @@ if __name__ == "__main__":
 
 
     print(predict_fuel_consumption(speed_knots=20, displacement_tons=70000, weather_factor=1.2, fuel_type="hydrogen"))
-print(predict_fuel_consumption(speed_knots=12, displacement_tons=25000, weather_factor=0.98, fuel_type="diesel"))
+    print(predict_fuel_consumption(speed_knots=12, displacement_tons=25000, weather_factor=0.98, fuel_type="diesel"))
