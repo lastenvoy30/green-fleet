@@ -17,3 +17,13 @@ EMISSION_FACTOR = {
 }
 
 EU_ETS_PRICE_PER_TON_CO2_EUR = 75
+
+# fraction of cargo capacity LOST when using this fuel,
+# due to extra fuel storage volume needed (from your research doc)
+VOLUMETRIC_CARGO_PENALTY = {
+    "diesel": 0.0,
+    "lng": 0.05,
+    "methanol": 0.10,
+    "ammonia": 0.15,
+    "hydrogen": 0.30,
+}
