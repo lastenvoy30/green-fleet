@@ -1,0 +1,56 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Vessel = {
+  id: string;
+  displacement_tons: number;
+  capacity_teu: number;
+};
+
+type FleetResponse = {
+  fleet: Vessel[];
+  cargo_demand_teu: number;
+};
+
+export default function Home() {
+  const [fleetData, setFleetData] = useState<FleetResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/fleet")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+        return res.json();
+      })
+      .then((data: FleetResponse) => {
+        setFleetData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <main className="p-8">Loading fleet data...</main>;
+  if (error) return <main className="p-8 text-red-500">Error: {error}</main>;
+
+  return (
+    <main className="p-8">
+      <h1 className="text-2xl font-bold mb-4">Green Fleet Dashboard</h1>
+      <p className="mb-4">Cargo demand: {fleetData?.cargo_demand_teu} TEU</p>
+
+      <div className="space-y-2">
+        {fleetData?.fleet.map((vessel) => (
+          <div key={vessel.id} className="border p-3 rounded">
+            <p className="font-semibold">{vessel.id}</p>
+            <p>Displacement: {vessel.displacement_tons} tons</p>
+            <p>Capacity: {vessel.capacity_teu} TEU</p>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}
