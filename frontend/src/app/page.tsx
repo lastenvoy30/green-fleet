@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 type Vessel = {
   id: string;
@@ -33,6 +34,21 @@ type OptimizeResponse = {
   fitness_score: number;
 };
 
+type BenchmarkStats = {
+  avg_cost: number;
+  min_cost: number;
+  max_cost: number;
+  std_dev_cost: number;
+  avg_time_sec: number;
+  all_costs: number[];
+};
+
+type BenchmarkResponse = {
+  quantum_inspired: BenchmarkStats;
+  standard_ga: BenchmarkStats;
+  rule_based: BenchmarkStats;
+};
+
 export default function Home() {
   const [fleetData, setFleetData] = useState<FleetResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,6 +56,9 @@ export default function Home() {
 
   const [optimizing, setOptimizing] = useState(false);
   const [optimizeResult, setOptimizeResult] = useState<OptimizeResponse | null>(null);
+
+  const [benchmarking, setBenchmarking] = useState(false);
+  const [benchmarkResult, setBenchmarkResult] = useState<BenchmarkResponse | null>(null);
 
   useEffect(() => {
     fetch("http://127.0.0.1:8000/fleet")
@@ -76,6 +95,25 @@ export default function Home() {
       });
   };
 
+  const runBenchmark = () => {
+    setBenchmarking(true);
+    setBenchmarkResult(null);
+
+    fetch("http://127.0.0.1:8000/benchmark")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Server responded with ${res.status}`);
+        return res.json();
+      })
+      .then((data: BenchmarkResponse) => {
+        setBenchmarkResult(data);
+        setBenchmarking(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setBenchmarking(false);
+      });
+  };
+
   if (loading) return <main className="p-8">Loading fleet data...</main>;
   if (error) return <main className="p-8 text-red-500">Error: {error}</main>;
 
@@ -103,34 +141,34 @@ export default function Home() {
       </button>
 
       {optimizeResult && (
-  <div className="mt-6">
-    <h2 className="text-xl font-bold mb-4">Optimized Plan</h2>
+        <div className="mt-6">
+          <h2 className="text-xl font-bold mb-4">Optimized Plan</h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-        <p className="text-sm text-gray-600">Total Voyage Cost</p>
-        <p className="text-2xl font-bold text-green-700">
-          ${optimizeResult.total_fuel_cost_usd.toLocaleString()}
-        </p>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Total Voyage Cost</p>
+              <p className="text-2xl font-bold text-green-700">
+                ${optimizeResult.total_fuel_cost_usd.toLocaleString()}
+              </p>
+            </div>
 
-      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-        <p className="text-sm text-gray-600">Carbon Tax (EU ETS)</p>
-        <p className="text-2xl font-bold text-blue-700">
-          €{optimizeResult.total_carbon_tax_eur.toLocaleString()}
-        </p>
-      </div>
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Carbon Tax (EU ETS)</p>
+              <p className="text-2xl font-bold text-blue-700">
+                €{optimizeResult.total_carbon_tax_eur.toLocaleString()}
+              </p>
+            </div>
 
-      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
-        <p className="text-sm text-gray-600">Total Emissions</p>
-        <p className="text-2xl font-bold text-gray-700">
-          {optimizeResult.total_emissions_tons.toLocaleString()} tons CO₂
-        </p>
-      </div>
-    </div>
+            <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+              <p className="text-sm text-gray-600">Total Emissions</p>
+              <p className="text-2xl font-bold text-gray-700">
+                {optimizeResult.total_emissions_tons.toLocaleString()} tons CO₂
+              </p>
+            </div>
+          </div>
 
-    <p className="mb-2">Total capacity: {optimizeResult.total_capacity_teu} TEU</p>
-    <p className="mb-4">Demand met: {optimizeResult.demand_met ? "Yes" : "No"}</p>
+          <p className="mb-2">Total capacity: {optimizeResult.total_capacity_teu} TEU</p>
+          <p className="mb-4">Demand met: {optimizeResult.demand_met ? "Yes" : "No"}</p>
 
           <div className="space-y-2 mt-4">
             {optimizeResult.vessel_plans.map((plan) => (
@@ -145,6 +183,37 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <button
+          onClick={runBenchmark}
+          disabled={benchmarking}
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+        >
+          {benchmarking ? "Running Benchmark (takes a few seconds)..." : "Run Benchmark Comparison"}
+        </button>
+
+        {benchmarkResult && (
+          <div className="mt-6">
+            <h2 className="text-xl font-bold mb-4">Benchmark: Average Cost Comparison</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={[
+                  { name: "Quantum-Inspired", avgCost: benchmarkResult.quantum_inspired.avg_cost },
+                  { name: "Standard GA", avgCost: benchmarkResult.standard_ga.avg_cost },
+                  { name: "Rule-Based", avgCost: benchmarkResult.rule_based.avg_cost },
+                ]}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="avgCost" fill="#16a34a" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
