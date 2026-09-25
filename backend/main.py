@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from predict import predict_fuel_consumption
 from fleet_optimizer import quantum_inspired_fleet_optimize, CARGO_DEMAND_TEU, FLEET
 from fastapi.middleware.cors import CORSMiddleware
+from benchmark import run_benchmark
+
 
 app = FastAPI()
 
@@ -44,3 +46,8 @@ def get_fleet():
         "fleet": FLEET,
         "cargo_demand_teu": CARGO_DEMAND_TEU,
     }
+
+@app.get("/benchmark")
+def benchmark():
+    results = run_benchmark(n_runs=5)
+    return results
