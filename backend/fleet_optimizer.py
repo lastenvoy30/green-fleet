@@ -21,7 +21,6 @@ def evaluate_vessel_choice(vessel, speed_knots, fuel_type, weather_factor=1.05):
     emissions_tons = fuel_tons * EMISSION_FACTOR[fuel_type]
     carbon_tax_eur = emissions_tons * EU_ETS_PRICE_PER_TON_CO2_EUR
 
-    # usable cargo capacity after volumetric penalty
     penalty = VOLUMETRIC_CARGO_PENALTY[fuel_type]
     usable_capacity_teu = vessel["capacity_teu"] * (1 - penalty)
 
@@ -32,6 +31,9 @@ def evaluate_vessel_choice(vessel, speed_knots, fuel_type, weather_factor=1.05):
         "speed_knots": speed_knots,
         "fuel_type": fuel_type,
         "fuel_tons": round(fuel_tons, 2),
+        "fuel_cost_usd": round(fuel_cost_usd, 2),
+        "emissions_tons": round(emissions_tons, 2),
+        "carbon_tax_eur": round(carbon_tax_eur, 2),
         "usable_capacity_teu": round(usable_capacity_teu, 1),
         "total_score": round(total_score, 2),
     }
@@ -63,7 +65,6 @@ def update_probabilities(prob_dict, best_choice, learning_rate=0.15):
     return prob_dict
 
 def evaluate_fleet_plan(fleet_probs):
-    """Sample one choice per vessel, evaluate the whole fleet plan together."""
     vessel_results = []
     for vessel in FLEET:
         speed = sample_choice(fleet_probs[vessel["id"]]["speed"])
@@ -72,15 +73,20 @@ def evaluate_fleet_plan(fleet_probs):
         vessel_results.append(result)
 
     total_cost = sum(v["total_score"] for v in vessel_results)
+    total_fuel_cost = sum(v["fuel_cost_usd"] for v in vessel_results)
+    total_carbon_tax = sum(v["carbon_tax_eur"] for v in vessel_results)
+    total_emissions = sum(v["emissions_tons"] for v in vessel_results)
     total_capacity = sum(v["usable_capacity_teu"] for v in vessel_results)
     demand_met = total_capacity >= CARGO_DEMAND_TEU
 
-    # heavy penalty if demand isn't met, so the optimizer avoids these plans
     fitness_score = total_cost if demand_met else total_cost + 1_000_000
 
     return {
         "vessel_plans": vessel_results,
         "total_cost": round(total_cost, 2),
+        "total_fuel_cost_usd": round(total_fuel_cost, 2),
+        "total_carbon_tax_eur": round(total_carbon_tax, 2),
+        "total_emissions_tons": round(total_emissions, 2),
         "total_capacity_teu": round(total_capacity, 1),
         "demand_met": demand_met,
         "fitness_score": round(fitness_score, 2),
