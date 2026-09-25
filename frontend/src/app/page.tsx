@@ -25,6 +25,9 @@ type VesselPlan = {
 type OptimizeResponse = {
   vessel_plans: VesselPlan[];
   total_cost: number;
+  total_fuel_cost_usd: number;
+  total_carbon_tax_eur: number;
+  total_emissions_tons: number;
   total_capacity_teu: number;
   demand_met: boolean;
   fitness_score: number;
@@ -100,11 +103,34 @@ export default function Home() {
       </button>
 
       {optimizeResult && (
-        <div className="mt-6">
-          <h2 className="text-xl font-bold mb-2">Optimized Plan</h2>
-          <p>Total cost: ${optimizeResult.total_cost}</p>
-          <p>Total capacity: {optimizeResult.total_capacity_teu} TEU</p>
-          <p>Demand met: {optimizeResult.demand_met ? "Yes" : "No"}</p>
+  <div className="mt-6">
+    <h2 className="text-xl font-bold mb-4">Optimized Plan</h2>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+        <p className="text-sm text-gray-600">Total Voyage Cost</p>
+        <p className="text-2xl font-bold text-green-700">
+          ${optimizeResult.total_fuel_cost_usd.toLocaleString()}
+        </p>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+        <p className="text-sm text-gray-600">Carbon Tax (EU ETS)</p>
+        <p className="text-2xl font-bold text-blue-700">
+          €{optimizeResult.total_carbon_tax_eur.toLocaleString()}
+        </p>
+      </div>
+
+      <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+        <p className="text-sm text-gray-600">Total Emissions</p>
+        <p className="text-2xl font-bold text-gray-700">
+          {optimizeResult.total_emissions_tons.toLocaleString()} tons CO₂
+        </p>
+      </div>
+    </div>
+
+    <p className="mb-2">Total capacity: {optimizeResult.total_capacity_teu} TEU</p>
+    <p className="mb-4">Demand met: {optimizeResult.demand_met ? "Yes" : "No"}</p>
 
           <div className="space-y-2 mt-4">
             {optimizeResult.vessel_plans.map((plan) => (
