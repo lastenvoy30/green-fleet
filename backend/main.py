@@ -59,7 +59,8 @@ def get_fleet():
         "cargo_demand_teu": CARGO_DEMAND_TEU,
     }
 
-@app.get("/benchmark")
-def benchmark():
-    results = run_benchmark(n_runs=5)
+@app.post("/benchmark")
+def benchmark(req: OptimizeRequest):
+    fleet = [v.dict() for v in req.fleet]
+    results = run_benchmark(fleet, req.cargo_demand_teu, n_runs=5)
     return results

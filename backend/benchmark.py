@@ -5,14 +5,13 @@ from fleet_optimizer import quantum_inspired_fleet_optimize
 from baseline_methods import standard_ga_optimize, rule_based_assignment
 
 
-def run_multiple(method_fn, n_runs=5):
+def run_multiple(method_fn, fleet, cargo_demand_teu, n_runs=5):
     costs = []
     times = []
 
     for i in range(n_runs):
-        print(f"[debug] run {i}, random check: {random.random()}")
         start = time.time()
-        result = method_fn()
+        result = method_fn(fleet, cargo_demand_teu)
         elapsed = time.time() - start
 
         costs.append(result["total_cost"])
@@ -28,34 +27,24 @@ def run_multiple(method_fn, n_runs=5):
     }
 
 
-def run_benchmark(n_runs=5):
+def run_benchmark(fleet, cargo_demand_teu, n_runs=5):
     print(f"Running each method {n_runs} times...\n")
 
-    print("Quantum-Inspired Optimizer (QIGA/QPSO)...")
-    print(f"[debug] random check before quantum runs: {random.random()}")
-    quantum_stats = run_multiple(quantum_inspired_fleet_optimize, n_runs)
+    quantum_stats = run_multiple(quantum_inspired_fleet_optimize, fleet, cargo_demand_teu, n_runs)
+    ga_stats = run_multiple(standard_ga_optimize, fleet, cargo_demand_teu, n_runs)
+    rule_stats = run_multiple(rule_based_assignment, fleet, cargo_demand_teu, n_runs=1)
 
-    print("Standard GA...")
-    ga_stats = run_multiple(standard_ga_optimize, n_runs)
-
-    print("Rule-Based (no search)...")
-    rule_stats = run_multiple(rule_based_assignment, n_runs=1)
-
-    results = {
+    return {
         "quantum_inspired": quantum_stats,
         "standard_ga": ga_stats,
         "rule_based": rule_stats,
     }
 
-    print("\n===== BENCHMARK RESULTS =====")
-    for method, stats in results.items():
-        print(f"\n{method}:")
-        print(f"  avg cost: {stats['avg_cost']}")
-        print(f"  min/max cost: {stats['min_cost']} / {stats['max_cost']}")
-        print(f"  std dev: {stats['std_dev_cost']}")
-        print(f"  avg time (sec): {stats['avg_time_sec']}")
 
-    return results
+if __name__ == "__main__":
+    from vessel_data import FLEET, CARGO_DEMAND_TEU
+    results = run_benchmark(FLEET, CARGO_DEMAND_TEU, n_runs=5)
+    print(results)
 
 
 if __name__ == "__main__":
