@@ -4,6 +4,7 @@ from predict import predict_fuel_consumption
 from fleet_optimizer import quantum_inspired_fleet_optimize, CARGO_DEMAND_TEU, FLEET
 from fastapi.middleware.cors import CORSMiddleware
 from benchmark import run_benchmark
+from pydantic import BaseModel
 
 
 app = FastAPI()
@@ -35,9 +36,20 @@ def predict(req: PredictRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/optimize")
-def optimize():
-    best_plan = quantum_inspired_fleet_optimize()
+
+class VesselInput(BaseModel):
+    id: str
+    displacement_tons: float
+    capacity_teu: float
+
+class OptimizeRequest(BaseModel):
+    fleet: list[VesselInput]
+    cargo_demand_teu: float
+
+@app.post("/optimize")
+def optimize(req: OptimizeRequest):
+    fleet = [v.dict() for v in req.fleet]
+    best_plan = quantum_inspired_fleet_optimize(fleet, req.cargo_demand_teu)
     return best_plan
 
 @app.get("/fleet")

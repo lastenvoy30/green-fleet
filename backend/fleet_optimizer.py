@@ -64,9 +64,9 @@ def update_probabilities(prob_dict, best_choice, learning_rate=0.15):
         prob_dict[key] /= total
     return prob_dict
 
-def evaluate_fleet_plan(fleet_probs):
+def evaluate_fleet_plan(fleet_probs, fleet, cargo_demand_teu):
     vessel_results = []
-    for vessel in FLEET:
+    for vessel in fleet:
         speed = sample_choice(fleet_probs[vessel["id"]]["speed"])
         fuel = sample_choice(fleet_probs[vessel["id"]]["fuel"])
         result = evaluate_vessel_choice(vessel, speed, fuel)
@@ -77,7 +77,7 @@ def evaluate_fleet_plan(fleet_probs):
     total_carbon_tax = sum(v["carbon_tax_eur"] for v in vessel_results)
     total_emissions = sum(v["emissions_tons"] for v in vessel_results)
     total_capacity = sum(v["usable_capacity_teu"] for v in vessel_results)
-    demand_met = total_capacity >= CARGO_DEMAND_TEU
+    demand_met = total_capacity >= cargo_demand_teu
 
     fitness_score = total_cost if demand_met else total_cost + 1_000_000
 
@@ -92,24 +92,30 @@ def evaluate_fleet_plan(fleet_probs):
         "fitness_score": round(fitness_score, 2),
     }
 
-def quantum_inspired_fleet_optimize(population_size=10, generations=20):
-    fleet_probs = initialize_fleet_probabilities()
+
+def quantum_inspired_fleet_optimize(fleet, cargo_demand_teu, population_size=10, generations=20):
+    fleet_probs = {}
+    for vessel in fleet:
+        fleet_probs[vessel["id"]] = {
+            "speed": {s: 1 / len(SPEED_OPTIONS) for s in SPEED_OPTIONS},
+            "fuel": {f: 1 / len(FUEL_OPTIONS) for f in FUEL_OPTIONS},
+        }
+
     best_overall = None
 
     for gen in range(generations):
-        population = [evaluate_fleet_plan(fleet_probs) for _ in range(population_size)]
+        population = [evaluate_fleet_plan(fleet_probs, fleet, cargo_demand_teu) for _ in range(population_size)]
         best_in_gen = min(population, key=lambda x: x["fitness_score"])
 
         if best_overall is None or best_in_gen["fitness_score"] < best_overall["fitness_score"]:
             best_overall = best_in_gen
 
-        # nudge each vessel's probabilities toward the best plan found this generation
         for v in best_in_gen["vessel_plans"]:
             vid = v["vessel_id"]
             fleet_probs[vid]["speed"] = update_probabilities(fleet_probs[vid]["speed"], v["speed_knots"])
             fleet_probs[vid]["fuel"] = update_probabilities(fleet_probs[vid]["fuel"], v["fuel_type"])
 
-    return best_overall    
+    return best_overall   
 
 
 if __name__ == "__main__":
