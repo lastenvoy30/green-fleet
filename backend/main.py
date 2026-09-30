@@ -14,7 +14,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
     "http://localhost:3000",
-    "https://YOUR-VERCEL-URL.vercel.app",
+    "https://navq-green-fleet.vercel.app",
 ],
     allow_methods=["*"],
     allow_headers=["*"],
