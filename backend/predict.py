@@ -1,10 +1,14 @@
 import pandas as pd
 import joblib
+from pathlib import Path
 from physics_model import calculate_fuel_consumption
 
-# load the trained model and the column structure it expects
-model = joblib.load("fuel_model.pkl")
-model_columns = joblib.load("model_columns.pkl")
+# Get the directory where this file (predict.py) is located
+BASE_DIR = Path(__file__).resolve().parent
+
+# Load model files using absolute paths
+model = joblib.load(BASE_DIR / "fuel_model.pkl")
+model_columns = joblib.load(BASE_DIR / "model_columns.pkl")
 
 FUEL_TYPES = ["diesel", "lng", "methanol", "ammonia", "hydrogen"]
 
