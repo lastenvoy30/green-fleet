@@ -77,7 +77,7 @@ export default function Home() {
 
   // load a starting default fleet once, so the form isn't empty on first load
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/fleet")
+    fetch("https://green-fleet-api.onrender.com/fleet")
       .then((res) => {
         if (!res.ok) throw new Error(`Server responded with ${res.status}`);
         return res.json();
@@ -120,7 +120,7 @@ export default function Home() {
 
   const runOptimizer = () => {
     setOptimizing(true);
-    fetch("http://127.0.0.1:8000/optimize", {
+    fetch("https://green-fleet-api.onrender.com/optimize", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fleet, cargo_demand_teu: cargoDemand }),
@@ -141,7 +141,7 @@ export default function Home() {
 
   const runBenchmark = () => {
     setBenchmarking(true);
-    fetch("http://127.0.0.1:8000/benchmark", {
+    fetch("https://green-fleet-api.onrender.com/benchmark", {   
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fleet, cargo_demand_teu: cargoDemand }),
