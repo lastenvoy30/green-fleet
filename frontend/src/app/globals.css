@@ -1,46 +1,141 @@
 @import "tailwindcss";
 
 :root {
-  --bg-page: #e4f8ee;
+  --bg-page: #edf8f3;
   --bg-surface: #ffffff;
-  --border-color: #bdcac0;
-  --text-primary: #0e1f19;
-  --text-secondary: #3e4942;
-  --accent-green: #16845b;
-  --accent-green-dark: #006946;
-  --accent-green-bg: #def3e9;
+  --bg-surface-soft: #f5faf7;
+
+  --border-color: #d8e8e1;
+
+  --text-primary: #0b1713;
+  --text-secondary: #5f7069;
+  --text-muted: #87958f;
+
+  --accent-green: #087f5b;
+  --accent-green-dark: #066b4d;
+  --accent-green-bg: #dff3ea;
+
   --accent-blue: #0d6682;
+
   --danger-bg: #ffdad6;
   --danger-text: #93000a;
-  --chip-bg: #d3e7dd;
+
+  --chip-bg: #dcefe6;
+
   --select-bg: #94f6c4;
   --select-text: #002113;
 }
 
 .dark {
-  --bg-page: #0a1520;
-  --bg-surface: #101e30;
-  --border-color: #223448;
-  --text-primary: #eaf1f5;
-  --text-secondary: #7c93a8;
-  --accent-green: #2bb3a0;
-  --accent-green-dark: #239485;
-  --accent-green-bg: #16332c;
+  --bg-page: #061019;
+  --bg-surface: #0b1a27;
+  --bg-surface-soft: #102333;
+
+  --border-color: #1d3443;
+
+  --text-primary: #f2f7f5;
+  --text-secondary: #93a6af;
+  --text-muted: #71858f;
+
+  --accent-green: #00c98b;
+  --accent-green-dark: #00b77d;
+  --accent-green-bg: #0c3b31;
+
   --accent-blue: #4fb8d9;
+
   --danger-bg: #4a1620;
   --danger-text: #ff8a80;
-  --chip-bg: #16332c;
-  --select-bg: #2bb3a0;
-  --select-text: #0a1520;
+
+  --chip-bg: #163b32;
+
+  --select-bg: #00c98b;
+  --select-text: #061019;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
 }
 
 body {
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  font-family: "Inter", Arial, Helvetica, sans-serif;
   background: var(--bg-page);
   color: var(--text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
 }
 
 .font-heading {
-  font-family: 'Manrope', 'Inter', Arial, Helvetica, sans-serif;
+  font-family: "Manrope", "Inter", Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--select-bg);
+  color: var(--select-text);
+}
+
+/* NavQ UI helpers */
+
+.card-surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.dark .card-surface {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}
+
+.bg-page {
+  background: var(--bg-page);
+}
+
+.bg-surface {
+  background: var(--bg-surface);
+}
+
+.bg-surface-soft {
+  background: var(--bg-surface-soft);
+}
+
+.accent-green {
+  color: var(--accent-green);
+}
+
+.accent-green-bg {
+  background: var(--accent-green-bg);
 }
